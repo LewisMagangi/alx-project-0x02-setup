@@ -1,25 +1,36 @@
 
+
 import Header from "../components/layout/Header";
 import PostCard from "../components/common/PostCard";
-import { useEffect, useState } from "react";
 import { PostProps } from "../interfaces";
 
 const POSTS_API = "https://jsonplaceholder.typicode.com/posts?_limit=10";
 
-export default function PostsPage() {
-  const [posts, setPosts] = useState<PostProps[]>([]);
-  useEffect(() => {
-    fetch(POSTS_API)
-      .then(res => res.json())
-      .then(data => {
-        setPosts(data.map((post: any) => ({
-          title: post.title,
-          content: post.body,
-          userId: post.userId,
-        })));
-      });
-  }, []);
+export async function getStaticProps() {
+  const res = await fetch(POSTS_API);
+  const data = await res.json();
+  interface ApiPost {
+    userId: number;
+    id: number;
+    title: string;
+    body: string;
+  }
 
+  const posts: PostProps[] = data.map((post: ApiPost) => ({
+    title: post.title,
+    content: post.body,
+    userId: post.userId,
+  }));
+  return {
+    props: { posts },
+  };
+}
+
+interface PostsPageProps {
+  posts: PostProps[];
+}
+
+export default function PostsPage({ posts }: PostsPageProps) {
   return (
     <>
       <Header />
